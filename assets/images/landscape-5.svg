@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Noche nevada</title>
+  <desc id="desc">Paisaje nocturno con nieve, luna y cabana iluminada.</desc>
+  <rect width="600" height="600" fill="#020617"/>
+  <circle cx="455" cy="110" r="48" fill="#f8fafc"/>
+  <g fill="#e0f2fe" opacity="0.85">
+    <circle cx="90" cy="85" r="4"/>
+    <circle cx="165" cy="160" r="3"/>
+    <circle cx="300" cy="95" r="4"/>
+    <circle cx="520" cy="210" r="3"/>
+    <circle cx="380" cy="250" r="4"/>
+  </g>
+  <path d="M0 330 130 145 270 330Z" fill="#1e293b"/>
+  <path d="M200 350 360 115 580 350Z" fill="#334155"/>
+  <path d="M340 145 360 115 392 153 370 145 350 170Z" fill="#f8fafc"/>
+  <path d="M0 430 Q150 390 300 430 T600 430 V600 H0Z" fill="#f8fafc"/>
+  <rect x="195" y="360" width="160" height="105" fill="#92400e"/>
+  <path d="M175 365 275 285 380 365Z" fill="#7f1d1d"/>
+  <rect x="250" y="398" width="48" height="67" fill="#451a03"/>
+  <rect x="210" y="386" width="36" height="32" fill="#fde68a"/>
+  <rect x="310" y="386" width="36" height="32" fill="#fde68a"/>
+</svg>

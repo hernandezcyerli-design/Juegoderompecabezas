@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Playa tropical</title>
+  <desc id="desc">Playa con palmeras, mar turquesa y cielo rosado.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#fb7185"/>
+      <stop offset="0.6" stop-color="#fde68a"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#sky)"/>
+  <circle cx="95" cy="120" r="52" fill="#fff7ed" opacity="0.9"/>
+  <path d="M0 305 Q150 265 300 305 T600 305 V600 H0Z" fill="#06b6d4"/>
+  <path d="M0 405 Q140 375 280 405 T600 405 V600 H0Z" fill="#facc15"/>
+  <path d="M420 370 C430 285 442 220 465 150" fill="none" stroke="#7c2d12" stroke-width="22" stroke-linecap="round"/>
+  <path d="M465 160 C400 120 360 145 335 185 C395 178 435 188 465 160Z" fill="#15803d"/>
+  <path d="M470 160 C490 95 535 82 580 98 C530 130 505 158 470 160Z" fill="#16a34a"/>
+  <path d="M470 162 C525 170 560 205 575 250 C525 232 490 200 470 162Z" fill="#22c55e"/>
+  <path d="M60 468 Q160 448 260 468 T460 468" fill="none" stroke="#fef3c7" stroke-width="16" opacity="0.9"/>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Bosque con rio</title>
+  <desc id="desc">Bosque verde con rio brillante y montanas lejanas.</desc>
+  <rect width="600" height="600" fill="#bbf7d0"/>
+  <path d="M0 215 120 105 240 220Z" fill="#64748b"/>
+  <path d="M165 230 335 80 520 230Z" fill="#475569"/>
+  <path d="M0 245 H600 V600 H0Z" fill="#14532d"/>
+  <path d="M275 245 C230 320 360 370 310 600 H420 C470 430 355 355 410 245Z" fill="#38bdf8"/>
+  <g fill="#166534">
+    <path d="M70 260 25 355 H115Z"/>
+    <path d="M150 235 95 365 H205Z"/>
+    <path d="M500 240 445 365 H555Z"/>
+    <path d="M565 290 520 390 H600Z"/>
+  </g>
+  <g fill="#854d0e">
+    <rect x="63" y="350" width="14" height="55"/>
+    <rect x="143" y="360" width="14" height="60"/>
+    <rect x="493" y="360" width="14" height="60"/>
+  </g>
+  <path d="M300 325 C335 345 355 375 335 425" fill="none" stroke="#e0f2fe" stroke-width="12" opacity="0.8"/>
+</svg>

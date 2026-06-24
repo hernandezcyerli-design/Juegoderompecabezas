@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Desierto al atardecer</title>
+  <desc id="desc">Dunas del desierto con cactus y sol rojo.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#7c2d12"/>
+      <stop offset="0.45" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#fed7aa"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#sky)"/>
+  <circle cx="430" cy="165" r="72" fill="#dc2626" opacity="0.85"/>
+  <path d="M0 360 Q145 270 300 360 T600 360 V600 H0Z" fill="#f59e0b"/>
+  <path d="M0 455 Q150 350 310 455 T600 455 V600 H0Z" fill="#d97706"/>
+  <path d="M130 390 V250" stroke="#166534" stroke-width="24" stroke-linecap="round"/>
+  <path d="M130 315 H85 V275" stroke="#166534" stroke-width="20" stroke-linecap="round" fill="none"/>
+  <path d="M130 335 H180 V295" stroke="#166534" stroke-width="20" stroke-linecap="round" fill="none"/>
+  <path d="M485 430 V315" stroke="#14532d" stroke-width="20" stroke-linecap="round"/>
+  <path d="M485 370 H525 V335" stroke="#14532d" stroke-width="16" stroke-linecap="round" fill="none"/>
+</svg>

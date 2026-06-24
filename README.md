@@ -46,3 +46,11 @@ Flujo recomendado:
 4. Memorizar la imagen original.
 5. Resolver el rompecabezas.
 6. Finalizar y revisar el ranking.
+
+## Imagenes de prueba
+
+El proyecto incluye 5 imagenes SVG locales de paisajes en `assets/images/`. En cada partida se selecciona una imagen aleatoria.
+
+## Pruebas
+
+Abre `tests.html` en el navegador para ejecutar pruebas automatizadas basicas sobre recursos y compatibilidad del navegador.

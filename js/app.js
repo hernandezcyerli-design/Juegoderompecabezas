@@ -5,7 +5,13 @@ const RANKING_KEY = 'puzzleRanking';
 const BOARD_SIZE = 3;
 const TOTAL_TILES = BOARD_SIZE * BOARD_SIZE;
 const EMPTY_TILE = TOTAL_TILES - 1;
-const PUZZLE_IMAGE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%232563eb'/%3E%3Cstop offset='1' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='600' height='600' fill='url(%23g)'/%3E%3Ccircle cx='155' cy='145' r='82' fill='%23ffffff' opacity='.9'/%3E%3Ccircle cx='445' cy='455' r='96' fill='%230f172a' opacity='.25'/%3E%3Cpath d='M95 430 C190 270 320 540 505 225' fill='none' stroke='%23ffffff' stroke-width='38' stroke-linecap='round' opacity='.88'/%3E%3Ctext x='300' y='330' text-anchor='middle' font-family='Arial' font-size='82' font-weight='800' fill='%23ffffff'%3EPUZZLE%3C/text%3E%3C/svg%3E`;
+const LANDSCAPE_IMAGES = [
+  'assets/images/landscape-1.svg',
+  'assets/images/landscape-2.svg',
+  'assets/images/landscape-3.svg',
+  'assets/images/landscape-4.svg',
+  'assets/images/landscape-5.svg',
+];
 
 const state = {
   currentUser: localStorage.getItem(SESSION_KEY) || '',
@@ -14,6 +20,7 @@ const state = {
   seconds: 0,
   timerId: null,
   isPlaying: false,
+  currentImage: LANDSCAPE_IMAGES[0],
 };
 
 function escapeHtml(value) {
@@ -132,6 +139,7 @@ function handleLogin(event) {
 function renderGameHome() {
   stopTimer();
   state.isPlaying = false;
+  state.currentImage = getRandomLandscape();
   app.innerHTML = `
     <section class="panel game-home">
       <div class="game-home-copy">
@@ -143,7 +151,7 @@ function renderGameHome() {
           <button type="button" class="secondary" id="logout-button">Cerrar sesion</button>
         </div>
       </div>
-      <img class="preview-image" src="${PUZZLE_IMAGE}" alt="Imagen original del rompecabezas">
+      <img class="preview-image" src="${state.currentImage}" alt="Imagen original del rompecabezas">
     </section>
   `;
 
@@ -159,6 +167,7 @@ function renderGameHome() {
 function startGame() {
   state.moves = 0;
   state.seconds = 0;
+  state.currentImage = getRandomLandscape();
   state.tiles = createShuffledTiles();
   state.isPlaying = false;
   renderOriginalImage();
@@ -168,6 +177,10 @@ function startGame() {
     renderPuzzle();
     startTimer();
   }, 1800);
+}
+
+function getRandomLandscape() {
+  return LANDSCAPE_IMAGES[Math.floor(Math.random() * LANDSCAPE_IMAGES.length)];
 }
 
 function renderOriginalImage() {
@@ -180,7 +193,7 @@ function renderOriginalImage() {
           <p>Observa la imagen original. En unos segundos se mezclara automaticamente.</p>
         </div>
       </div>
-      <img class="original-large" src="${PUZZLE_IMAGE}" alt="Imagen original del rompecabezas">
+      <img class="original-large" src="${state.currentImage}" alt="Imagen original del rompecabezas">
     </section>
   `;
 }
@@ -205,7 +218,7 @@ function renderPuzzle() {
         </div>
         <aside class="side-reference">
           <h3>Imagen original</h3>
-          <img src="${PUZZLE_IMAGE}" alt="Referencia de imagen original">
+          <img src="${state.currentImage}" alt="Referencia de imagen original">
           <p>Toca una pieza junto al espacio vacio para moverla.</p>
         </aside>
       </div>
@@ -230,7 +243,7 @@ function renderTile(tile, index) {
       type="button"
       class="tile"
       data-index="${index}"
-      style="background-image: url('${PUZZLE_IMAGE}'); background-position: ${x * 50}% ${y * 50}%;"
+      style="background-image: url('${state.currentImage}'); background-position: ${x * 50}% ${y * 50}%;"
       aria-label="Pieza ${tile + 1}"
     ></button>
   `;
