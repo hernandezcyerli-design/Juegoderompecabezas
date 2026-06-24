@@ -1,10 +1,28 @@
 const app = document.querySelector('#app');
 const USERS_KEY = 'puzzleUsers';
 const SESSION_KEY = 'puzzleCurrentUser';
+const BOARD_SIZE = 3;
+const TOTAL_TILES = BOARD_SIZE * BOARD_SIZE;
+const EMPTY_TILE = TOTAL_TILES - 1;
+const PUZZLE_IMAGE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%232563eb'/%3E%3Cstop offset='1' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='600' height='600' fill='url(%23g)'/%3E%3Ccircle cx='155' cy='145' r='82' fill='%23ffffff' opacity='.9'/%3E%3Ccircle cx='445' cy='455' r='96' fill='%230f172a' opacity='.25'/%3E%3Cpath d='M95 430 C190 270 320 540 505 225' fill='none' stroke='%23ffffff' stroke-width='38' stroke-linecap='round' opacity='.88'/%3E%3Ctext x='300' y='330' text-anchor='middle' font-family='Arial' font-size='82' font-weight='800' fill='%23ffffff'%3EPUZZLE%3C/text%3E%3C/svg%3E`;
 
 const state = {
   currentUser: localStorage.getItem(SESSION_KEY) || '',
+  tiles: [],
+  moves: 0,
+  seconds: 0,
+  timerId: null,
+  isPlaying: false,
 };
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"]/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+  }[char]));
+}
 
 function getUsers() {
   return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
@@ -103,22 +121,194 @@ function handleLogin(event) {
 }
 
 function renderGameHome() {
+  stopTimer();
+  state.isPlaying = false;
   app.innerHTML = `
-    <section class="panel welcome-panel">
-      <div>
+    <section class="panel game-home">
+      <div class="game-home-copy">
         <p class="eyebrow">Jugador activo</p>
-        <h2>${state.currentUser}</h2>
-        <p>Tu sesion esta iniciada. El modulo de juego se agregara en el siguiente paso.</p>
+        <h2>${escapeHtml(state.currentUser)}</h2>
+        <p>Presiona iniciar para ver la imagen original. Luego se desarmara y podras volver a armarla.</p>
+        <div class="actions">
+          <button type="button" id="start-button">Iniciar</button>
+          <button type="button" class="secondary" id="logout-button">Cerrar sesion</button>
+        </div>
       </div>
-      <button type="button" class="secondary" id="logout-button">Cerrar sesion</button>
+      <img class="preview-image" src="${PUZZLE_IMAGE}" alt="Imagen original del rompecabezas">
     </section>
   `;
 
+  document.querySelector('#start-button').addEventListener('click', startGame);
   document.querySelector('#logout-button').addEventListener('click', () => {
+    stopTimer();
     state.currentUser = '';
     localStorage.removeItem(SESSION_KEY);
     renderAuth();
   });
+}
+
+function startGame() {
+  state.moves = 0;
+  state.seconds = 0;
+  state.tiles = createShuffledTiles();
+  state.isPlaying = false;
+  renderOriginalImage();
+
+  window.setTimeout(() => {
+    state.isPlaying = true;
+    renderPuzzle();
+    startTimer();
+  }, 1800);
+}
+
+function renderOriginalImage() {
+  app.innerHTML = `
+    <section class="panel puzzle-stage">
+      <div class="stage-header">
+        <div>
+          <p class="eyebrow">Memoriza la imagen</p>
+          <h2>La partida esta por comenzar</h2>
+          <p>Observa la imagen original. En unos segundos se mezclara automaticamente.</p>
+        </div>
+      </div>
+      <img class="original-large" src="${PUZZLE_IMAGE}" alt="Imagen original del rompecabezas">
+    </section>
+  `;
+}
+
+function renderPuzzle() {
+  app.innerHTML = `
+    <section class="panel puzzle-stage">
+      <div class="stage-header">
+        <div>
+          <p class="eyebrow">Arma el rompecabezas</p>
+          <h2>Turno de ${escapeHtml(state.currentUser)}</h2>
+        </div>
+        <div class="stats">
+          <span>Movimientos: <strong id="moves-count">${state.moves}</strong></span>
+          <span>Tiempo: <strong id="time-count">${formatTime(state.seconds)}</strong></span>
+        </div>
+      </div>
+
+      <div class="puzzle-layout">
+        <div class="board" aria-label="Tablero de rompecabezas">
+          ${state.tiles.map((tile, index) => renderTile(tile, index)).join('')}
+        </div>
+        <aside class="side-reference">
+          <h3>Imagen original</h3>
+          <img src="${PUZZLE_IMAGE}" alt="Referencia de imagen original">
+          <p>Toca una pieza junto al espacio vacio para moverla.</p>
+        </aside>
+      </div>
+    </section>
+  `;
+
+  document.querySelectorAll('.tile:not(.empty)').forEach((tile) => {
+    tile.addEventListener('click', () => moveTile(Number(tile.dataset.index)));
+  });
+}
+
+function renderTile(tile, index) {
+  if (tile === EMPTY_TILE) {
+    return `<button type="button" class="tile empty" data-index="${index}" aria-label="Espacio vacio"></button>`;
+  }
+
+  const x = tile % BOARD_SIZE;
+  const y = Math.floor(tile / BOARD_SIZE);
+
+  return `
+    <button
+      type="button"
+      class="tile"
+      data-index="${index}"
+      style="background-image: url('${PUZZLE_IMAGE}'); background-position: ${x * 50}% ${y * 50}%;"
+      aria-label="Pieza ${tile + 1}"
+    ></button>
+  `;
+}
+
+function createShuffledTiles() {
+  const tiles = Array.from({ length: TOTAL_TILES }, (_, index) => index);
+  let emptyIndex = EMPTY_TILE;
+
+  for (let i = 0; i < 90; i += 1) {
+    const neighbors = getMovableIndexes(emptyIndex);
+    const randomIndex = neighbors[Math.floor(Math.random() * neighbors.length)];
+    [tiles[emptyIndex], tiles[randomIndex]] = [tiles[randomIndex], tiles[emptyIndex]];
+    emptyIndex = randomIndex;
+  }
+
+  return tiles;
+}
+
+function getMovableIndexes(index) {
+  const row = Math.floor(index / BOARD_SIZE);
+  const col = index % BOARD_SIZE;
+  const indexes = [];
+
+  if (row > 0) indexes.push(index - BOARD_SIZE);
+  if (row < BOARD_SIZE - 1) indexes.push(index + BOARD_SIZE);
+  if (col > 0) indexes.push(index - 1);
+  if (col < BOARD_SIZE - 1) indexes.push(index + 1);
+
+  return indexes;
+}
+
+function moveTile(index) {
+  const emptyIndex = state.tiles.indexOf(EMPTY_TILE);
+
+  if (!state.isPlaying || !getMovableIndexes(emptyIndex).includes(index)) {
+    return;
+  }
+
+  [state.tiles[emptyIndex], state.tiles[index]] = [state.tiles[index], state.tiles[emptyIndex]];
+  state.moves += 1;
+  renderPuzzle();
+
+  if (isSolved()) {
+    stopTimer();
+    state.isPlaying = false;
+    renderSolvedPlaceholder();
+  }
+}
+
+function isSolved() {
+  return state.tiles.every((tile, index) => tile === index);
+}
+
+function startTimer() {
+  stopTimer();
+  state.timerId = window.setInterval(() => {
+    state.seconds += 1;
+    const timer = document.querySelector('#time-count');
+    if (timer) timer.textContent = formatTime(state.seconds);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerId) {
+    window.clearInterval(state.timerId);
+    state.timerId = null;
+  }
+}
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function renderSolvedPlaceholder() {
+  app.innerHTML = `
+    <section class="panel result-panel">
+      <p class="eyebrow">Rompecabezas resuelto</p>
+      <h2>Buen trabajo, ${escapeHtml(state.currentUser)}</h2>
+      <p>Resultado provisional: ${state.moves} movimientos en ${formatTime(state.seconds)}.</p>
+      <button type="button" id="back-home-button">Volver</button>
+    </section>
+  `;
+
+  document.querySelector('#back-home-button').addEventListener('click', renderGameHome);
 }
 
 if (state.currentUser) {
