@@ -18,7 +18,7 @@ Permite crear un usuario con contrasena e iniciar sesion con una cuenta existent
 
 2. Juego
 
-Muestra la imagen original, la mezcla automaticamente y permite armarla como rompecabezas deslizante de 3x3.
+Muestra la imagen original, la mezcla automaticamente y permite armarla como rompecabezas de 3x3 arrastrando fragmentos con el mouse.
 
 3. Resultado y ranking
 

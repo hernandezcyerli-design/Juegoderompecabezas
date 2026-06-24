@@ -4,7 +4,6 @@ const SESSION_KEY = 'puzzleCurrentUser';
 const RANKING_KEY = 'puzzleRanking';
 const BOARD_SIZE = 3;
 const TOTAL_TILES = BOARD_SIZE * BOARD_SIZE;
-const EMPTY_TILE = TOTAL_TILES - 1;
 const LANDSCAPE_IMAGES = [
   'assets/images/landscape-1.svg',
   'assets/images/landscape-2.svg',
@@ -21,6 +20,7 @@ const state = {
   timerId: null,
   isPlaying: false,
   currentImage: LANDSCAPE_IMAGES[0],
+  dragFromIndex: null,
 };
 
 function escapeHtml(value) {
@@ -219,71 +219,101 @@ function renderPuzzle() {
         <aside class="side-reference">
           <h3>Imagen original</h3>
           <img src="${state.currentImage}" alt="Referencia de imagen original">
-          <p>Toca una pieza junto al espacio vacio para moverla.</p>
+          <p>Arrastra cualquier fragmento y sueltalo sobre otra posicion para intercambiarlos.</p>
         </aside>
       </div>
     </section>
   `;
 
-  document.querySelectorAll('.tile:not(.empty)').forEach((tile) => {
-    tile.addEventListener('click', () => moveTile(Number(tile.dataset.index)));
+  document.querySelectorAll('.tile').forEach((tile) => {
+    tile.addEventListener('dragstart', handleDragStart);
+    tile.addEventListener('dragend', handleDragEnd);
+  });
+
+  document.querySelectorAll('.slot').forEach((slot) => {
+    slot.addEventListener('dragover', handleDragOver);
+    slot.addEventListener('dragleave', handleDragLeave);
+    slot.addEventListener('drop', handleDrop);
   });
 }
 
 function renderTile(tile, index) {
-  if (tile === EMPTY_TILE) {
-    return `<button type="button" class="tile empty" data-index="${index}" aria-label="Espacio vacio"></button>`;
-  }
-
   const x = tile % BOARD_SIZE;
   const y = Math.floor(tile / BOARD_SIZE);
 
   return `
-    <button
-      type="button"
-      class="tile"
-      data-index="${index}"
-      style="background-image: url('${state.currentImage}'); background-position: ${x * 50}% ${y * 50}%;"
-      aria-label="Pieza ${tile + 1}"
-    ></button>
+    <div class="slot" data-index="${index}">
+      <button
+        type="button"
+        class="tile"
+        draggable="true"
+        data-index="${index}"
+        style="background-image: url('${state.currentImage}'); background-position: ${x * 50}% ${y * 50}%;"
+        aria-label="Pieza ${tile + 1}. Arrastrar para mover."
+      ></button>
+    </div>
   `;
 }
 
 function createShuffledTiles() {
   const tiles = Array.from({ length: TOTAL_TILES }, (_, index) => index);
-  let emptyIndex = EMPTY_TILE;
 
-  for (let i = 0; i < 90; i += 1) {
-    const neighbors = getMovableIndexes(emptyIndex);
-    const randomIndex = neighbors[Math.floor(Math.random() * neighbors.length)];
-    [tiles[emptyIndex], tiles[randomIndex]] = [tiles[randomIndex], tiles[emptyIndex]];
-    emptyIndex = randomIndex;
+  for (let index = tiles.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [tiles[index], tiles[randomIndex]] = [tiles[randomIndex], tiles[index]];
+  }
+
+  if (tiles.every((tile, index) => tile === index)) {
+    [tiles[0], tiles[1]] = [tiles[1], tiles[0]];
   }
 
   return tiles;
 }
 
-function getMovableIndexes(index) {
-  const row = Math.floor(index / BOARD_SIZE);
-  const col = index % BOARD_SIZE;
-  const indexes = [];
-
-  if (row > 0) indexes.push(index - BOARD_SIZE);
-  if (row < BOARD_SIZE - 1) indexes.push(index + BOARD_SIZE);
-  if (col > 0) indexes.push(index - 1);
-  if (col < BOARD_SIZE - 1) indexes.push(index + 1);
-
-  return indexes;
-}
-
-function moveTile(index) {
-  const emptyIndex = state.tiles.indexOf(EMPTY_TILE);
-
-  if (!state.isPlaying || !getMovableIndexes(emptyIndex).includes(index)) {
+function handleDragStart(event) {
+  if (!state.isPlaying) {
+    event.preventDefault();
     return;
   }
 
-  [state.tiles[emptyIndex], state.tiles[index]] = [state.tiles[index], state.tiles[emptyIndex]];
+  state.dragFromIndex = Number(event.currentTarget.dataset.index);
+  event.currentTarget.classList.add('dragging');
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(state.dragFromIndex));
+}
+
+function handleDragEnd(event) {
+  event.currentTarget.classList.remove('dragging');
+  state.dragFromIndex = null;
+  document.querySelectorAll('.slot.drag-over').forEach((slot) => slot.classList.remove('drag-over'));
+}
+
+function handleDragOver(event) {
+  if (!state.isPlaying) return;
+  event.preventDefault();
+  event.currentTarget.classList.add('drag-over');
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+
+  const fromIndex = state.dragFromIndex ?? Number(event.dataTransfer.getData('text/plain'));
+  const toIndex = Number(event.currentTarget.dataset.index);
+  moveTile(fromIndex, toIndex);
+}
+
+function moveTile(fromIndex, toIndex) {
+  if (!state.isPlaying || fromIndex === toIndex || Number.isNaN(fromIndex) || Number.isNaN(toIndex)) {
+    return;
+  }
+
+  [state.tiles[fromIndex], state.tiles[toIndex]] = [state.tiles[toIndex], state.tiles[fromIndex]];
   state.moves += 1;
   renderPuzzle();
 
