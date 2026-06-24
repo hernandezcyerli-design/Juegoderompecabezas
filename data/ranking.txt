@@ -1,2 +1,4 @@
 # Archivo de referencia para ranking de prueba.
 # En esta version HTML/CSS/JS pura, el ranking funcional se guarda en localStorage.
+# Formato propuesto:
+# usuario|tiempo_segundos|movimientos|puntaje|fecha_iso

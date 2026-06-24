@@ -1,6 +1,7 @@
 const app = document.querySelector('#app');
 const USERS_KEY = 'puzzleUsers';
 const SESSION_KEY = 'puzzleCurrentUser';
+const RANKING_KEY = 'puzzleRanking';
 const BOARD_SIZE = 3;
 const TOTAL_TILES = BOARD_SIZE * BOARD_SIZE;
 const EMPTY_TILE = TOTAL_TILES - 1;
@@ -30,6 +31,14 @@ function getUsers() {
 
 function saveUsers(users) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function getRanking() {
+  return JSON.parse(localStorage.getItem(RANKING_KEY) || '[]');
+}
+
+function saveRanking(ranking) {
+  localStorage.setItem(RANKING_KEY, JSON.stringify(ranking));
 }
 
 function showMessage(text, type = 'error') {
@@ -268,7 +277,8 @@ function moveTile(index) {
   if (isSolved()) {
     stopTimer();
     state.isPlaying = false;
-    renderSolvedPlaceholder();
+    saveCurrentResult();
+    renderResult();
   }
 }
 
@@ -298,17 +308,81 @@ function formatTime(totalSeconds) {
   return `${minutes}:${seconds}`;
 }
 
-function renderSolvedPlaceholder() {
+function calculateScore(seconds, moves) {
+  return Math.max(1000 - Math.round(seconds * moves), 0);
+}
+
+function saveCurrentResult() {
+  const ranking = getRanking();
+  const result = {
+    username: state.currentUser,
+    seconds: state.seconds,
+    moves: state.moves,
+    score: calculateScore(state.seconds, state.moves),
+    date: new Date().toISOString(),
+  };
+
+  ranking.push(result);
+  ranking.sort((a, b) => b.score - a.score || a.seconds - b.seconds || a.moves - b.moves);
+  saveRanking(ranking.slice(0, 10));
+}
+
+function renderResult() {
+  const score = calculateScore(state.seconds, state.moves);
+
   app.innerHTML = `
     <section class="panel result-panel">
       <p class="eyebrow">Rompecabezas resuelto</p>
       <h2>Buen trabajo, ${escapeHtml(state.currentUser)}</h2>
-      <p>Resultado provisional: ${state.moves} movimientos en ${formatTime(state.seconds)}.</p>
-      <button type="button" id="back-home-button">Volver</button>
+      <div class="result-grid">
+        <article>
+          <span>${formatTime(state.seconds)}</span>
+          <strong>Tiempo total</strong>
+        </article>
+        <article>
+          <span>${state.moves}</span>
+          <strong>Movimientos</strong>
+        </article>
+        <article>
+          <span>${score}</span>
+          <strong>Puntaje</strong>
+        </article>
+      </div>
+      <p>El puntaje premia resolver el juego con menos tiempo y menos movimientos.</p>
+      <button type="button" id="finish-button">Finalizar</button>
     </section>
   `;
 
-  document.querySelector('#back-home-button').addEventListener('click', renderGameHome);
+  document.querySelector('#finish-button').addEventListener('click', renderRanking);
+}
+
+function renderRanking() {
+  const ranking = getRanking();
+
+  app.innerHTML = `
+    <section class="panel ranking-panel">
+      <div class="stage-header">
+        <div>
+          <p class="eyebrow">Ranking</p>
+          <h2>Mejores jugadores</h2>
+        </div>
+        <button type="button" id="play-again-button">Volver a jugar</button>
+      </div>
+
+      <div class="ranking-list">
+        ${ranking.length ? ranking.map((item, index) => `
+          <article class="ranking-item">
+            <span class="rank-number">#${index + 1}</span>
+            <strong>${escapeHtml(item.username)}</strong>
+            <span>${item.score} puntos</span>
+            <small>${formatTime(item.seconds)} · ${item.moves} movimientos</small>
+          </article>
+        `).join('') : '<p>No hay resultados guardados todavia.</p>'}
+      </div>
+    </section>
+  `;
+
+  document.querySelector('#play-again-button').addEventListener('click', renderGameHome);
 }
 
 if (state.currentUser) {
