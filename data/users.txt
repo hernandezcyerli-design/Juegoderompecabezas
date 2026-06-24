@@ -1,0 +1,2 @@
+# Archivo de referencia para usuarios de prueba.
+# En esta version HTML/CSS/JS pura, los usuarios funcionales se guardan en localStorage.
