@@ -1,0 +1,30 @@
+flowchart LR
+  actor([Usuario])
+
+  subgraph sistema["Juego de Rompecabezas Web"]
+    registrar((Crear usuario))
+    iniciarSesion((Iniciar sesion))
+    cerrarSesion((Cerrar sesion))
+    iniciarPartida((Iniciar partida))
+    verImagen((Ver imagen original))
+    resolver((Resolver rompecabezas))
+    moverPiezas((Mover piezas))
+    verResultado((Ver resultado))
+    verRanking((Consultar ranking))
+    volverJugar((Volver a jugar))
+  end
+
+  actor --> registrar
+  actor --> iniciarSesion
+  actor --> cerrarSesion
+  actor --> iniciarPartida
+  actor --> moverPiezas
+  actor --> verResultado
+  actor --> verRanking
+  actor --> volverJugar
+
+  iniciarPartida --> verImagen
+  resolver -. incluye .-> moverPiezas
+  resolver -. incluye .-> verResultado
+  verResultado --> verRanking
+  volverJugar --> iniciarPartida

@@ -1,0 +1,24 @@
+flowchart LR
+  usuario([Usuario])
+
+  subgraph navegador["Navegador web"]
+    html["index.html\nEstructura de la app"]
+    css["css/styles.css\nPresentacion visual"]
+    js["js/app.js\nLogica de autenticacion, juego y ranking"]
+    pruebas["tests.html + js/tests.js\nPruebas basicas"]
+    storage[(localStorage\nUsuarios, sesion y ranking)]
+  end
+
+  subgraph recursos["Recursos locales"]
+    imagenes["assets/images/*.svg\nImagenes del rompecabezas"]
+    datos["data/*.txt\nModelo de datos de referencia"]
+  end
+
+  usuario --> html
+  html --> css
+  html --> js
+  js --> storage
+  js --> imagenes
+  pruebas --> storage
+  pruebas --> imagenes
+  datos -. documenta .-> storage

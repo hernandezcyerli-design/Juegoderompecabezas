@@ -1,0 +1,60 @@
+classDiagram
+  class Usuario {
+    +string username
+    +string password
+  }
+
+  class EstadoJuego {
+    +string currentUser
+    +number[] tiles
+    +number moves
+    +number seconds
+    +number timerId
+    +boolean isPlaying
+    +string currentImage
+    +number dragFromIndex
+  }
+
+  class Pieza {
+    +number valorOriginal
+    +number posicionActual
+    +string imagen
+  }
+
+  class Partida {
+    +iniciar()
+    +mezclarPiezas()
+    +moverPieza(fromIndex, toIndex)
+    +validarSolucion()
+    +detener()
+  }
+
+  class Resultado {
+    +string username
+    +number seconds
+    +number moves
+    +number score
+    +string date
+  }
+
+  class Ranking {
+    +Resultado[] resultados
+    +guardarResultado(resultado)
+    +ordenarPorPuntaje()
+    +obtenerTop10()
+  }
+
+  class AlmacenamientoLocal {
+    +getUsers()
+    +saveUsers(users)
+    +getRanking()
+    +saveRanking(ranking)
+  }
+
+  Usuario "1" --> "0..*" Resultado : genera
+  EstadoJuego "1" --> "9" Pieza : contiene
+  Partida "1" --> "1" EstadoJuego : actualiza
+  Partida "1" --> "1" Resultado : crea
+  Ranking "1" --> "0..10" Resultado : almacena
+  AlmacenamientoLocal ..> Usuario : persiste
+  AlmacenamientoLocal ..> Ranking : persiste

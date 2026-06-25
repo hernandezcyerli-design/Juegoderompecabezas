@@ -1,0 +1,46 @@
+sequenceDiagram
+  actor Usuario
+  participant UI as Interfaz HTML
+  participant JS as app.js
+  participant LS as localStorage
+
+  Usuario->>UI: Ingresa usuario y contrasena
+  UI->>JS: handleRegister()
+  JS->>LS: getItem(puzzleUsers)
+  LS-->>JS: Lista de usuarios
+  JS->>LS: setItem(puzzleUsers)
+  JS-->>UI: Mensaje de usuario creado
+
+  Usuario->>UI: Envia formulario de ingreso
+  UI->>JS: handleLogin()
+  JS->>LS: getItem(puzzleUsers)
+  LS-->>JS: Usuarios registrados
+  JS->>LS: setItem(puzzleCurrentUser)
+  JS-->>UI: renderGameHome()
+
+  Usuario->>UI: Presiona Iniciar
+  UI->>JS: startGame()
+  JS->>JS: Seleccionar imagen y mezclar piezas
+  JS-->>UI: renderOriginalImage()
+  JS-->>UI: renderPuzzle()
+  JS->>JS: startTimer()
+
+  loop Hasta resolver el rompecabezas
+    Usuario->>UI: Arrastra y suelta pieza
+    UI->>JS: handleDrop()
+    JS->>JS: moveTile()
+    JS->>JS: isSolved()
+    JS-->>UI: renderPuzzle()
+  end
+
+  JS->>JS: stopTimer()
+  JS->>JS: calculateScore()
+  JS->>LS: getItem(puzzleRanking)
+  LS-->>JS: Ranking actual
+  JS->>LS: setItem(puzzleRanking)
+  JS-->>UI: renderResult()
+  Usuario->>UI: Presiona Finalizar
+  UI->>JS: renderRanking()
+  JS->>LS: getItem(puzzleRanking)
+  LS-->>JS: Mejores resultados
+  JS-->>UI: Ranking ordenado

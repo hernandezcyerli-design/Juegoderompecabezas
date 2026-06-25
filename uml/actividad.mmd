@@ -1,0 +1,34 @@
+flowchart TD
+  inicio([Inicio]) --> sesion{Existe sesion activa?}
+  sesion -- No --> auth[Mostrar formularios de ingreso y registro]
+  auth --> accion{Accion del usuario}
+  accion -- Crear usuario --> validarRegistro{Datos validos y usuario disponible?}
+  validarRegistro -- No --> mensajeRegistro[Mostrar mensaje de error]
+  mensajeRegistro --> auth
+  validarRegistro -- Si --> guardarUsuario[Guardar usuario en localStorage]
+  guardarUsuario --> auth
+  accion -- Iniciar sesion --> validarLogin{Credenciales correctas?}
+  validarLogin -- No --> mensajeLogin[Mostrar mensaje de error]
+  mensajeLogin --> auth
+  validarLogin -- Si --> guardarSesion[Guardar usuario activo]
+  sesion -- Si --> home[Mostrar pantalla inicial del juego]
+  guardarSesion --> home
+  home --> iniciar[Presionar Iniciar]
+  iniciar --> seleccionarImagen[Seleccionar imagen aleatoria]
+  seleccionarImagen --> mezclar[Crear y mezclar piezas 3x3]
+  mezclar --> mostrarOriginal[Mostrar imagen original]
+  mostrarOriginal --> tablero[Mostrar tablero mezclado]
+  tablero --> temporizador[Iniciar temporizador]
+  temporizador --> arrastrar[Arrastrar y soltar pieza]
+  arrastrar --> intercambiar[Intercambiar posiciones]
+  intercambiar --> contar[Incrementar movimientos]
+  contar --> resuelto{Rompecabezas resuelto?}
+  resuelto -- No --> arrastrar
+  resuelto -- Si --> detener[Detener temporizador]
+  detener --> puntaje[Calcular puntaje]
+  puntaje --> guardarResultado[Guardar resultado en ranking]
+  guardarResultado --> resultado[Mostrar resultado]
+  resultado --> ranking[Mostrar ranking]
+  ranking --> repetir{Volver a jugar?}
+  repetir -- Si --> home
+  repetir -- No --> fin([Fin])
